@@ -3,8 +3,8 @@
 set -euo pipefail
 
 # TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for <YOUR TOOL>.
-GH_REPO="https://github.com/aws-amplify"
-TOOL_NAME="amplify"
+GH_REPO="https://github.com/aws-amplify/amplify-cli"
+TOOL_NAME="aws-amplify-cli"
 TOOL_TEST="amplify-cli --version"
 
 fail() {
