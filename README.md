@@ -40,7 +40,8 @@ asdf install aws-amplify-cli latest
 asdf global aws-amplify-cli latest
 
 # Now aws-amplify-cli commands are available
-Please, check the official documentation in the section [Commands Summary](https://github.com/aws-amplify/amplify-cli#commands-summary)
+Please, check the official documentation in the section Commands Summary:
+https://github.com/aws-amplify/amplify-cli#commands-summary
 ```
 
 Check [asdf](https://github.com/asdf-vm/asdf) readme for more instructions on how to
