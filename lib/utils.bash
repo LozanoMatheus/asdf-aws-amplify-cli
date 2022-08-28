@@ -23,13 +23,11 @@ sort_versions() {
 list_github_tags() {
   local GH_RELEASES_PAGE='1'
   local GH_RELEASES
-  
   GH_RELEASES="$(curl -Ls "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
-  
   local RC="0"
   set +euo pipefail
   while [ ${RC} -eq 0 ]; do
-    GH_RELEASES_PAGE=$(( ${GH_RELEASES_PAGE} + 1 ))
+    GH_RELEASES_PAGE=$((${GH_RELEASES_PAGE} + 1))
     GH_RELEASES="${GH_RELEASES}$(curl -Ls "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
     RC="${?}"
   done
@@ -83,17 +81,17 @@ install_version() {
 }
 
 function get_os_name() {
-	local os_name
-	case $(uname -s) in
-	Linux*)
-		os_name="linux"
-		;;
-	Darwin*)
-		os_name="macos"
-		;;
-	*)
-		log_failure_and_exit "Script only supports macOS and Linux"
-		;;
-	esac
-	echo "${os_name}"
+  local os_name
+  case $(uname -s) in
+  Linux*)
+    os_name="linux"
+    ;;
+  Darwin*)
+    os_name="macos"
+    ;;
+  *)
+    log_failure_and_exit "Script only supports macOS and Linux"
+    ;;
+  esac
+  echo "${os_name}"
 }
