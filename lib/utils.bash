@@ -3,21 +3,17 @@
 set -euo pipefail
 
 # TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for <YOUR TOOL>.
-GH_REPO="https://github.com/aws-amplify/amplify-cli"
-TOOL_NAME="aws-amplify-cli"
-TOOL_TEST="amplify-cli --version"
+REPO_PROVIDER="github.com"
+REPO="aws-amplify/amplify-cli"
+TOOL_NAME="amplify"
+TOOL_TEST="${TOOL_NAME} --version"
 
 fail() {
   echo -e "asdf-$TOOL_NAME: $*"
   exit 1
 }
 
-curl_opts=(-fsSL)
-
-# NOTE: You might want to remove this if <YOUR TOOL> is not hosted on GitHub releases.
-if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-  curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
-fi
+curl_opts=(-fSL)
 
 sort_versions() {
   sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
@@ -25,24 +21,37 @@ sort_versions() {
 }
 
 list_github_tags() {
-  git ls-remote --tags --refs "$GH_REPO" |
-    grep -o 'refs/tags/.*' | cut -d/ -f3- |
-    sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+  local GH_RELEASES_PAGE='1'
+  local GH_RELEASES
+  
+  GH_RELEASES="$(curl -Ls "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
+  
+  local RC="0"
+  set +euo pipefail
+  while [ ${RC} -eq 0 ]; do
+    GH_RELEASES_PAGE=$(( ${GH_RELEASES_PAGE} + 1 ))
+    GH_RELEASES="${GH_RELEASES}$(curl -Ls "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
+    RC="${?}"
+  done
+  set -euo pipefail
+
+  echo "${GH_RELEASES}"
 }
 
 list_all_versions() {
   # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
   # Change this function if <YOUR TOOL> has other means of determining installable versions.
-  list_github_tags
+  list_github_tags | sed 's/^v//'
 }
 
 download_release() {
-  local version filename url
+  local version filename url os_name
   version="$1"
-  filename="$2"
+  os_name="$2"
+  filename="$3"
 
   # TODO: Adapt the release URL convention for <YOUR TOOL>
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  url="https://github.com/${REPO}/releases/download/${version}/amplify-pkg-${os_name}.tgz"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -80,7 +89,7 @@ function get_os_name() {
 		os_name="linux"
 		;;
 	Darwin*)
-		os_name="darwin"
+		os_name="macos"
 		;;
 	*)
 		log_failure_and_exit "Script only supports macOS and Linux"
