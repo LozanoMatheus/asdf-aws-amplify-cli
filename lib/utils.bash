@@ -80,7 +80,7 @@ install_version() {
   )
 }
 
-function get_os_name() {
+get_os_name() {
   local os_name
   case $(uname -s) in
   Linux*)
