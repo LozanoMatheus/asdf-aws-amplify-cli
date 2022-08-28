@@ -51,7 +51,7 @@ download_release() {
   filename="$3"
 
   # TODO: Adapt the release URL convention for <YOUR TOOL>
-  url="https://github.com/${REPO}/releases/download/${version}/amplify-pkg-${os_name}.tgz"
+  url="https://github.com/${REPO}/releases/download/v${version}/amplify-pkg-${os_name}.tgz"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
