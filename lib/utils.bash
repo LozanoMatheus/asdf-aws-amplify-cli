@@ -11,7 +11,7 @@ fail() {
   exit 1
 }
 
-curl_opts=(-fSL)
+CURL_OPTS=(-fSL)
 
 if [ -n "${GITHUB_API_TOKEN:-}" ]; then
   CURL_OPTS=("${CURL_OPTS[@]}" -H "Authorization: token ${GITHUB_API_TOKEN}")
@@ -25,12 +25,12 @@ sort_versions() {
 list_github_tags() {
   local GH_RELEASES_PAGE='1'
   local GH_RELEASES
-  GH_RELEASES="$(curl "${curl_opts[@]}" "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
+  GH_RELEASES="$(curl "${CURL_OPTS[@]}" "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
   local RC="0"
   set +euo pipefail
   while [ ${RC} -eq 0 ]; do
     GH_RELEASES_PAGE=$((${GH_RELEASES_PAGE} + 1))
-    GH_RELEASES="${GH_RELEASES}$(curl "${curl_opts[@]}" "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
+    GH_RELEASES="${GH_RELEASES}$(curl "${CURL_OPTS[@]}" "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
     RC="${?}"
   done
   set -euo pipefail
@@ -51,7 +51,7 @@ download_release() {
   url="https://github.com/${REPO}/releases/download/v${version}/amplify-pkg-${os_name}.tgz"
 
   echo "* Downloading $TOOL_NAME release $version..."
-  curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
+  curl "${CURL_OPTS[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
 install_version() {
