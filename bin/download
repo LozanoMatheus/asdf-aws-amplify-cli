@@ -12,16 +12,12 @@ mkdir -p "$ASDF_DOWNLOAD_PATH"
 
 os_name="$(get_os_name)"
 
-# TODO: Adapt this to proper extension and adapt extracting strategy.
 release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME-pkg-$os_name.tgz"
 
-# Download tar.gz file to the download directory
 download_release "$ASDF_INSTALL_VERSION" "${os_name}" "$release_file"
 
-#  Extract contents of tar.gz file into the download directory
 tar -xzf "$release_file" -C "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $release_file"
 
 \mv "${ASDF_DOWNLOAD_PATH}/amplify-pkg-${os_name}" "${ASDF_DOWNLOAD_PATH}/amplify"
 
-# Remove the tar.gz file since we don't need to keep it
 rm "$release_file"
