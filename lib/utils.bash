@@ -15,20 +15,24 @@ fail() {
 
 curl_opts=(-fSL)
 
+if [ -n "${GITHUB_API_TOKEN:-}" ]; then
+  CURL_OPTS=("${CURL_OPTS[@]}" -H "Authorization: token ${GITHUB_API_TOKEN}")
+fi
+
 sort_versions() {
   sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
-    LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
+    LC_ALL=C sort -h -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
 }
 
 list_github_tags() {
   local GH_RELEASES_PAGE='1'
   local GH_RELEASES
-  GH_RELEASES="$(curl -Ls "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
+  GH_RELEASES="$(curl "${curl_opts[@]}" "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
   local RC="0"
   set +euo pipefail
   while [ ${RC} -eq 0 ]; do
     GH_RELEASES_PAGE=$((${GH_RELEASES_PAGE} + 1))
-    GH_RELEASES="${GH_RELEASES}$(curl -Ls "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
+    GH_RELEASES="${GH_RELEASES}$(curl "${curl_opts[@]}" "https://api.github.com/repos/${REPO}/releases?per_page=100&page=${GH_RELEASES_PAGE}" | awk '/tag_name/{ rc = 1; gsub(/,|"/,"") ; print $2 }; END { exit !rc }')"
     RC="${?}"
   done
   set -euo pipefail
