@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for <YOUR TOOL>.
-REPO_PROVIDER="github.com"
 REPO="aws-amplify/amplify-cli"
 TOOL_NAME="amplify"
 TOOL_TEST="${TOOL_NAME} --version"
@@ -41,8 +39,6 @@ list_github_tags() {
 }
 
 list_all_versions() {
-  # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-  # Change this function if <YOUR TOOL> has other means of determining installable versions.
   list_github_tags | sed 's/^v//'
 }
 
@@ -52,7 +48,6 @@ download_release() {
   os_name="$2"
   filename="$3"
 
-  # TODO: Adapt the release URL convention for <YOUR TOOL>
   url="https://github.com/${REPO}/releases/download/v${version}/amplify-pkg-${os_name}.tgz"
 
   echo "* Downloading $TOOL_NAME release $version..."
@@ -72,7 +67,6 @@ install_version() {
     mkdir -p "$install_path"
     cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
 
-    # TODO: Assert <YOUR TOOL> executable exists.
     local tool_cmd
     tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
     test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
